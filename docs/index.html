@@ -150,6 +150,11 @@ summary{cursor:pointer}
   material('lampShade','Warm white linen drum shade','fff0d7',10);
   material('mediaWhite','Warm white media console','eeebe3');
   material('mediaFrost','Frosted gray drawer inserts','a9b0a9');
+  material('officeChair','Charcoal woven office chair','41454b',2);
+  material('officeDisplay','Office monitor display','a5becd');
+  material('officeDisplayInk','Office monitor interface','526f84');
+  material('sleeperFrame','Muted sage sleeper sofa upholstery','788474',2);
+  material('sleeperCushion','Muted sage sleeper sofa cushions','899584',2);
   material('bedroomTvScreen','50-inch bedroom TV screen','252930',15);
   material('bedroomConsoleWood','Walnut console legs and door grooves','71503a',6);
   material('tvScreen','65-inch TV screen','252930',15);
@@ -1089,6 +1094,103 @@ summary{cursor:pointer}
     ],'black');
   }
 
+  // Bedroom 2 office. The desk faces the solid wall beside the window.
+  const deskX=X(674),deskBack=Z(482),deskWidth=56/12,deskDepth=24/12,deskHeight=30/12;
+  const deskZ=deskBack+deskDepth/2,deskFront=deskBack+deskDepth;
+  const deskWhite='diningWhite',officeHardware='black';
+  cushion(deskX,deskZ,deskWidth,deskDepth,deskHeight-.075,.075,.034,deskWhite,.014);
+  furnishingBox(deskX,deskZ-.035,deskWidth-.10,deskDepth-.07,2.08,2.43,deskWhite);
+  for(const side of [-1,1]){
+    for(const end of [-1,1]){
+      furnishingBox(deskX+side*(deskWidth/2-.13),deskZ+end*.80,.105,.105,0,2.13,deskWhite);
+    }
+    const drawerX=deskX+side*(deskWidth-.16)/4,drawerWidth=(deskWidth-.19)/2;
+    furnishingBox(drawerX,deskFront-.065,drawerWidth,.045,2.11,2.424,officeHardware);
+    furnishingBox(drawerX,deskFront-.04,drawerWidth-.028,.037,2.125,2.392,deskWhite);
+    for(const end of [-1,1]){
+      furnishingBox(drawerX+end*(drawerWidth/4+.08),deskFront-.04,drawerWidth/2-.19,.037,2.39,2.419,deskWhite);
+    }
+  }
+  footprint(deskX,deskZ,deskWidth,deskDepth,'#f6f3ea');
+
+  function officeScreen(x,z,bottom,width,height){
+    furnishingBox(x,z,width+.056,.067,bottom-.031,bottom+height+.027,officeHardware);
+    furnishingBox(x,z+.036,width,.011,bottom,bottom+height,'officeDisplay');
+    furnishingBox(x,z+.043,width-.028,.006,bottom+height*.85,bottom+height*.96,'officeDisplayInk');
+    for(let row=0;row<4;row++){
+      const y=bottom+height*(.21+row*.146);
+      furnishingBox(x-width*.23,z+.043,width*.38,.006,y,y+height*.025,'officeDisplayInk');
+      furnishingBox(x+width*.22,z+.043,width*(.29-row*.028),.006,y,y+height*.025,'officeDisplayInk');
+    }
+  }
+  const monitorZ=deskBack+.37,monitorBottom=deskHeight+.36;
+  for(const side of [-1,1]){
+    const x=deskX+side*1.29;
+    cushion(x,monitorZ+.04,.52,.39,deskHeight,.045,.15,officeHardware,.014);
+    furnishingBox(x,monitorZ-.02,.105,.086,deskHeight+.03,monitorBottom+.26,officeHardware);
+    officeScreen(x,monitorZ,monitorBottom,1.72,.97);
+  }
+  const laptopZ=deskBack+.63;
+  cushion(deskX,laptopZ+.27,1.10,.73,deskHeight,.045,.045,'steel',.012);
+  officeScreen(deskX,laptopZ,deskHeight+.033,1.04,.59);
+  cushion(deskX,deskFront-.45,2.02,.69,deskHeight,.012,.066,'pillowInk',.005);
+  cushion(deskX-.18,deskFront-.43,1.36,.40,deskHeight+.013,.051,.035,officeHardware,.014);
+  for(let row=0;row<4;row++){
+    for(let key=0;key<13;key++){
+      furnishingBox(deskX-.18+(key-6)*.096,deskFront-.43+(row-1.5)*.077,
+        .079,.061,deskHeight+.059,deskHeight+.071,'sofaFrame');
+    }
+  }
+  cushion(deskX+.75,deskFront-.43,.23,.35,deskHeight+.013,.091,.105,officeHardware,.035);
+
+  const officeChairZ=deskFront+1.06;
+  loft([circle(deskX,officeChairZ,.17,.115),circle(deskX,officeChairZ,1.38,.09)],officeHardware);
+  for(let i=0;i<5;i++){
+    const angle=i*2*Math.PI/5,dx=Math.cos(angle),dz=Math.sin(angle);
+    const wheelX=deskX+dx*.94,wheelZ=officeChairZ+dz*.94;
+    const spoke=(reach,y,width)=>[[-1,-1],[-1,1],[1,1],[1,-1]].map(([end,side])=>
+      [deskX+dx*(reach+end*.055)-dz*side*width,y,officeChairZ+dz*(reach+end*.055)+dx*side*width]);
+    loft([spoke(.95,.15,.074),spoke(.10,.24,.099)],officeHardware);
+    loft([[0,.042],[.055,.086],[.14,.086],[.18,.042]].map(([y,r])=>circle(wheelX,wheelZ,y,r)),officeHardware);
+  }
+  cushion(deskX,officeChairZ-.07,1.69,1.57,1.32,.27,.22,'officeChair',.063);
+  loft([
+    [1.40,.57,1.50,.28],[1.62,.63,1.74,.32],[2.48,.76,1.60,.30],
+    [3.14,.87,1.76,.30],[3.78,.97,1.50,.27],[3.96,.99,1.19,.20]
+  ].map(([y,z,w,d])=>roundedRect(deskX,officeChairZ+z,y,w,d,.091)),'officeChair');
+  for(const side of [-1,1]){
+    const x=deskX+side*.91;
+    furnishingBox(x,officeChairZ+.19,.092,.13,1.43,2.06,officeHardware);
+    cushion(x,officeChairZ+.06,.185,.73,2.04,.10,.069,officeHardware,.026);
+  }
+  footprint(deskX,officeChairZ+.055,2.04,2.24,'#41454b');
+
+  // Compact twin pullout sleeper, shown in sofa position.
+  const sleeperWidth=60/12,sleeperDepth=32/12,sleeperX=X(690),sleeperZ=Z(655)-sleeperDepth/2;
+  const sleeperBack=sleeperZ+sleeperDepth/2,sleeperFront=sleeperZ-sleeperDepth/2;
+  const sleeperFrame='sleeperFrame',sleeperCushion='sleeperCushion';
+  for(const side of [-1,1])for(const end of [-1,1]){
+    leg(sleeperX+side*(sleeperWidth/2-.27),sleeperZ+end*(sleeperDepth/2-.24),
+      side*.04,end*.04,.29,.16,.095,'bedroomConsoleWood');
+  }
+  cushion(sleeperX,sleeperZ,sleeperWidth,sleeperDepth,.24,1.02,.19,sleeperFrame,.072);
+  cushion(sleeperX,sleeperBack-.235,sleeperWidth-.11,.47,1.18,1.68,.17,sleeperFrame,.066);
+  for(const side of [-1,1]){
+    cushion(sleeperX+side*(sleeperWidth/2-.19),sleeperZ,.38,sleeperDepth-.08,.91,1.12,.16,sleeperFrame,.066);
+  }
+  const seatWidth=sleeperWidth-.79;
+  cushion(sleeperX,sleeperFront+1.02,seatWidth,2.00,1.25,.37,.18,sleeperCushion,.087);
+  for(const side of [-1,1]){
+    const x=sleeperX+side*seatWidth/4;
+    loft([
+      roundedRect(x,sleeperBack-.74,1.49,seatWidth/2-.12,.40,.12),
+      roundedRect(x,sleeperBack-.72,1.63,seatWidth/2-.042,.54,.17),
+      roundedRect(x,sleeperBack-.49,2.68,seatWidth/2-.052,.47,.16),
+      roundedRect(x,sleeperBack-.43,2.83,seatWidth/2-.16,.30,.12)
+    ],sleeperCushion);
+  }
+  footprint(sleeperX,sleeperZ,sleeperWidth,sleeperDepth,'#899584');
+
   // Canadian 2026 Taos 4MOTION dimensions. Positive Z faces the garage door.
   const taosX=X((431+771)/2),taosZ=Z((853+1232)/2);
   const taosLength=4467/304.8,taosWidth=1841/304.8,taosMirrors=2097/304.8;
@@ -1250,7 +1352,7 @@ summary{cursor:pointer}
     {name:'Primary bedroom',dim:'13′3″ × 12′8″',p:[570,297],target:[711,267.5],pitch:-.30,area:[537,154,772,381]},
     {name:'Ensuite',p:[501,237],target:[456,270],area:[442,155,531,318]},
     {name:'Walk-in closet',p:[494,381],target:[445,419],area:[442,322,531,445]},
-    {name:'Bedroom 2',dim:'9′8″ × 10′0″',p:[662,604],target:[770,525],area:[598,480,772,657]},
+    {name:'Bedroom 2',dim:'9′8″ × 10′0″',p:[611,584],target:[679,502],pitch:-.28,area:[598,480,772,657]},
     {name:'Bedroom 3',dim:'13′3″ × 10′3″',p:[634,783],target:[769,762],area:[536,662,772,847]},
     {name:'Hall bath',p:[653,450],target:[731,400],area:[598,385,772,475]},
     {name:'Garage',dim:'20′0″ × 22′0″ nominal',p:[742,1218],target:[600,1055],pitch:-.29,y:garage,area:[429,854,771,1235]},
