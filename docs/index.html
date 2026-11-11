@@ -120,6 +120,8 @@ summary{cursor:pointer}
   material('diningOak','Natural oak dining furniture','ae8460',6);
   material('diningWhite','Satin white dining table','f7f5ef');
   material('linen','Oatmeal woven upholstery','c7bba7',2);
+  material('stoolCream','Cream woven island stool upholstery','e1cfb6',2);
+  material('stoolFrame','Matte black island stool frames','242526');
   material('planter','Matte stoneware planter','bcb0a0',9);
   material('soil','Potting soil','44372a',9);
   material('stem','Rubber plant stems','526047');
@@ -725,6 +727,39 @@ summary{cursor:pointer}
   function furnishingBox(x,z,w,d,b,t,mat){
     prism(x-w/2,z-d/2,x+w/2,z+d/2,b,t,mat,0,'furniture');
   }
+  // Counter stools face the island, with their seats tucked under its east overhang.
+  const stoolX=X(369);
+  for(const center of [365,414,463]){
+    const stoolZ=Z(center);
+    loft([
+      [-.74,2.10,0,.065,1.28],
+      [-.69,2.10,0,.14,1.45],
+      [-.36,2.09,0,.17,1.52],
+      [.22,2.11,8,.18,1.48],
+      [.46,2.18,33,.18,1.40],
+      [.61,2.33,66,.17,1.33],
+      [.72,2.65,78,.15,1.31],
+      [.79,2.96,78,.12,1.27],
+      [.80,3.00,78,.07,1.19]
+    ].map(([offset,y,degrees,thickness,width])=>{
+      const angle=degrees*Math.PI/180;
+      return roundedRect(0,stoolZ,0,thickness,width,thickness*.47).map(([n,,z])=>
+        [stoolX+offset+n*Math.sin(angle),y-n*Math.cos(angle),z]);
+    }),'stoolCream');
+    cushion(stoolX-.07,stoolZ,1.21,1.27,1.97,.072,.16,'stoolFrame',.02);
+    for(const side of [-1,1])for(const end of [-1,1]){
+      const topX=stoolX-.07+end*.49,topZ=stoolZ+side*.52;
+      const footX=topX+end*.27,footZ=topZ+side*.24;
+      loft([circle(footX,footZ,0,.034),circle(topX,topZ,2.01,.053)],'stoolFrame');
+    }
+    const railHeight=.68,railHalfDepth=.67,railHalfWidth=.68;
+    furnishingBox(stoolX-.07-railHalfDepth,stoolZ,.085,2*railHalfWidth,railHeight,railHeight+.065,'stoolFrame');
+    for(const side of [-1,1]){
+      furnishingBox(stoolX-.07,stoolZ+side*railHalfWidth,2*railHalfDepth,.065,railHeight,railHeight+.065,'stoolFrame');
+    }
+    footprint(stoolX,stoolZ,1.74,1.60,'#e1cfb6');
+  }
+
   const motifY=.043;
   for(const sign of [-1,1]){
     furnishingBox(rugX+sign*3.93,rugZ,.065,9.87,.030,motifY,'rugBorder');
