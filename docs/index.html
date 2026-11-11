@@ -16,6 +16,7 @@ summary{cursor:pointer}
   </div>
   <div class="viz-row sv-bar">
     <button type="button" class="btn btn-primary" data-mode="walk" aria-pressed="true">Walk</button>
+    <button type="button" class="btn" data-mode="exterior" aria-pressed="false">Exterior</button>
     <button type="button" class="btn" data-mode="orbit" aria-pressed="false">Dollhouse</button>
     <button type="button" class="btn" data-mode="plan" aria-pressed="false">Plan / measure</button>
     <select class="form-select sv-room" aria-label="Jump to a room"></select>
@@ -44,6 +45,7 @@ summary{cursor:pointer}
     <summary>Finishes, dimensions and assumptions</summary>
     <div class="sv-spec">
       <div><strong>Signed Cappuccino selections</strong><p>Desert Mirage 0231 walls, 300 Dolomite cabinets and vanities, K14 Riviera Oak island, and Maple White quartz. Warm Brown Oak laminate runs through the foyer and main living areas. Both baths use Canyon Slate Desert vinyl. Bedrooms, the walk-in closet and basement stairs use North American Grey carpet. White lacquered slab doors and woodwork pair with matte black door hardware and black ceiling fixtures.</p></div>
+      <div><strong>Exterior selections</strong><p>Williamsburg Gray shingles, Terratone aluminum and entry, Pinot Gris stucco, King’s Court acrylic stucco, Desert Stone trim, Prairie Clay siding, and a Sandstone overhead door. White windows and rear railing follow the finish schedule. Landscaping and grades are illustrative, adapted from another Villas lot.</p></div>
       <div><strong>Dimension basis</strong><p>Geometry traced from purchaser plan and foundation sheets, calibrated to the 31′ width and 40′ main depth. Room labels use the sell sheet’s nominal dimensions. The tape reads the scaled model. Ceiling heights, vault pitches, window heights, millwork, material appearance and mechanical placement are approximate. The two foyer risers are modeled at 7″ each, with a matching oak tread and painted risers. The kitchen tile backsplash is illustrative. The basement is unfinished with rough-in locations.</p></div>
     </div>
   </details>
@@ -115,6 +117,23 @@ summary{cursor:pointer}
   material('sandstone','Wayne Dalton Sandstone overhead door','c4b69e');
   material('whiteRailing','White aluminum rear railing','f3f3ec');
   material('lightingBlack','Black ceiling fixture trim','282829');
+  material('pinotGris','Imasco Pinot Gris trowel stucco','b8aa98',9);
+  material('desertStone','LP SmartSide Desert Stone trim','c7b8a5');
+  material('prairieClay','LP SmartSide Prairie Clay hardboard siding','a69783',19);
+  material('roofShingles','Owens Corning Williamsburg Gray asphalt shingles','55545a',17);
+  material('roofCap','Williamsburg Gray ridge cap','4d4d52',9);
+  material('exteriorGlass','Exterior window glass','8fa8b0',18);
+  material('sod','Kentucky bluegrass sod','81934e',20);
+  material('riverRock','River rock','aaa393',21);
+  material('mulch','Black mulch','3f3630',9);
+  material('landscapeEdging','Dark landscape edging','514c43');
+  material('bark','Tree bark','746453',9);
+  material('foliage','Tree and shrub foliage','587246',20);
+  material('foliageLight','Sunlit foliage','78914b',20);
+  material('shrubGold','Spirea foliage','a59f4c',20);
+  material('shrubWine','Ninebark foliage','65474e',20);
+  material('grassBlade','Ornamental grass','9e9d5c');
+  material('bloom','Hydrangea flower heads','eee4ca',9);
   material('ground','Site ground, illustrative','a6ae93',9);
   material('lamp','White disc diffuser','fff5d9',10);
   material('diningChairWhite','Warm white cross-back dining chair frame','eee9df');
@@ -376,21 +395,26 @@ summary{cursor:pointer}
   box(405,1240,430,1275,foyer,foyer+8.7,'stucco',0,'fixture',true);
   ceiling(233,1082,423,1275,foyer+8.7,0,'terratone');
   const V={top:vault}, F={bottom:foyer,top:foyerVault}, G={bottom:garage,top:7.6,mat:'garage',trim:false};
-  h(152,233,437,8,{...V,open:[[296,382,0,6.75,'patio']]});
-  h(152,437,533,8,{open:[W(486,520,4.35,6.85)]});
-  h(152,533,779,8,{open:[W(602,705,3,6.85)]});
-  v(237,152,311,8,V); h(311,216,237,8,V);
-  v(216,311,532,8,V); h(532,216,237,8,V);
-  v(237,532,foyerTopRiser,8,{...V,open:[W(560,594),W(722,755)]});
-  v(237,foyerTopRiser,1082,8,F);
-  h(1078,233,427,8,{...F,open:[[293,347,foyer,foyer+6.74,'front'],[348,371,foyer+.45,foyer+6.75,'sidelight']]});
-  v(775,152,575,8,{open:[W(509,542)]});
-  h(575,771,814,8); v(810,575,743,8); h(743,771,814,8);
-  v(775,743,849,8,{open:[W(778,812)]});
+  const exteriorWalls=[];
+  function exteriorBoundary(axis,fixed,a,b,thick,side,options={},finish={}){
+    wall(axis,fixed,a,b,thick,options);
+    exteriorWalls.push({axis,fixed,a,b,thick,side,open:options.open,...finish});
+  }
+  exteriorBoundary('h',152,233,437,8,-1,{...V,open:[[296,382,0,6.75,'patio']]});
+  exteriorBoundary('h',152,437,533,8,-1,{open:[W(486,520,4.35,6.85)]});
+  exteriorBoundary('h',152,533,779,8,-1,{open:[W(602,705,3,6.85)]});
+  exteriorBoundary('v',237,152,311,8,-1,V,{a:148}); exteriorBoundary('h',311,216,237,8,-1,V,{top:8.40,a:212});
+  exteriorBoundary('v',216,311,532,8,-1,V,{a:307,b:536,top:8.40}); exteriorBoundary('h',532,216,237,8,1,V,{top:8.40,a:212});
+  exteriorBoundary('v',237,532,foyerTopRiser,8,-1,{...V,open:[W(560,594),W(722,755)]});
+  exteriorBoundary('v',237,foyerTopRiser,1082,8,-1,F,{base:foyer});
+  exteriorBoundary('h',1078,233,427,8,1,{...F,open:[[293,347,foyer,foyer+6.74,'front'],[348,371,foyer+.45,foyer+6.75,'sidelight']]},{base:foyer});
+  exteriorBoundary('v',775,152,575,8,1,{open:[W(509,542)]},{a:148});
+  exteriorBoundary('h',575,771,814,8,-1,{}, {top:8.40,a:775}); exteriorBoundary('v',810,575,743,8,1,{},{a:571,b:747,top:8.40}); exteriorBoundary('h',743,771,814,8,1,{}, {top:8.40,a:775});
+  exteriorBoundary('v',775,743,849,8,1,{open:[W(778,812)]});
   h(849,427,533,8,G);
   h(849,533,779,8,{trimSides:[-1]});
-  v(775,853,1240,8,G); v(423,1082,1240,8,{...G,open:[W(1144,1196,garage+3.3,garage+6.2)]});
-  h(1236,423,779,8,{...G,open:[[464,746,garage,garage+7.0,'overhead']]});
+  exteriorBoundary('v',775,853,1240,8,1,G,{base:garage+.20,top:7.82}); exteriorBoundary('v',423,1082,1240,8,-1,{...G,open:[W(1144,1196,garage+3.3,garage+6.2)]},{base:garage+.20,top:7.82});
+  exteriorBoundary('h',1236,423,779,8,1,{...G,open:[[464,746,garage,garage+7.0,'overhead']]},{a:419,base:garage+.20,top:7.82});
   v(427,849,1082,8,{...F,open:[D(866,916,foyer)]});
   box(423,849,431,1082,garage,foyer,'garage',0,'wall');
   box(533,845,779,853,garage,0,'garage',0,'wall');
@@ -488,6 +512,214 @@ summary{cursor:pointer}
   }
   box(459,1236,750,1330,garage-.16,garage-.03,'concrete',0,'site');
   box(260,1305,459,1328,garage-.15,garage-.03,'concrete',0,'site');
+
+  // The front hip and rear gable follow the purchaser elevations. The site is illustrative.
+  const grade=garage-.04;
+  const exteriorFace=(points,mat)=>face(points,mat,0,'exterior');
+  const exteriorBox=(x1,z1,x2,z2,b,t,mat)=>box(x1,z1,x2,z2,b,t,mat,0,'exterior');
+  const landscapeBox=(x1,z1,x2,z2,b,t,mat)=>box(x1,z1,x2,z2,b,t,mat,0,'landscape');
+
+  function exteriorWall({axis,fixed,a,b,thick,side,open=[],base=0,top=8.57}){
+    const edge=fixed+side*thick/2;
+    const panel=(l,r,low,high,mat,projection=0,depth=.36)=>{
+      if(r<=l||high<=low)return;
+      const outer=edge+side*projection,inner=outer-side*depth;
+      const n=Math.min(outer,inner),f=Math.max(outer,inner);
+      exteriorBox(...(axis==='h'?[l,n,r,f]:[n,l,f,r]),low,high,mat);
+    };
+    const solid=(l,r,low,high)=>{
+      panel(l,r,low,Math.min(high,base),'concrete');
+      panel(l,r,Math.max(low,base),high,'pinotGris');
+    };
+    const surround=(l,r,sill,head,width)=>{
+      panel(l-width,l,sill-width*.04,head+.18,'desertStone',.83,1.02);
+      panel(r,r+width,sill-width*.04,head+.18,'desertStone',.83,1.02);
+      panel(l-width,r+width,head,head+.18,'desertStone',.83,1.02);
+    };
+    let cursor=a;
+    for(const [l,r,sill,head,kind] of open){
+      solid(cursor,l,grade-.70,top);
+      solid(l,r,grade-.70,sill);
+      solid(l,r,head,top);
+      if(kind==='front'||kind==='sidelight'){
+        panel(l,r,sill,head,'terratone',.27,.52);
+        if(kind==='front'){
+          surround(l,r+24,sill,head,2.45);
+          const paneHeight=.91;
+          for(let i=0;i<4;i++){
+            const low=sill+1.01+i*1.28;
+            panel(l+8.5,r-8.5,low-.045,low+paneHeight+.045,'black',.45,.26);
+            panel(l+9.4,r-9.4,low,low+paneHeight,'exteriorGlass',.62,.24);
+          }
+          panel(r-6,r-4,sill+2.77,sill+3.22,'black',1.23,1.08);
+        }else panel(l+4,r-4,sill+.14,head-.17,'exteriorGlass',.56,.42);
+      }else if(kind==='overhead'){
+        surround(l,r,sill,head,4.3);
+        for(let section=0;section<4;section++){
+          const height=(head-sill)/4,low=sill+section*height;
+          panel(l+.8,r-.8,low+.028,low+height-.021,'sandstone',-.36,.75);
+          if(section)panel(l+.8,r-.8,low-.026,low+.029,'terratone',-.71,.42);
+        }
+      }else{
+        const white='whiteRailing';
+        surround(l,r,sill,head,kind==='patio'?1.8:2.1);
+        panel(l,r,sill,head,white,-.04,.7);
+        panel(l+1.3,r-1.3,sill+.092,head-.087,'exteriorGlass',.11,.27);
+        if(r-l>36)panel((l+r)/2-.65,(l+r)/2+.65,sill,head,white,.29,.52);
+        if(kind==='patio'){
+          const rail=(lo,hi,y1,y2)=>panel(lo,hi,y1,y2,white,5.75,1.22);
+          rail(l-.45,r+.45,.12,.26);rail(l-.63,r+.63,2.84,3.01);
+          for(let at=l+.55;at<r;at+=4.1)rail(at,at+.58,.24,2.85);
+          rail(r-.50,r+.23,.12,3);
+        }
+      }
+      cursor=r;
+    }
+    solid(cursor,b,grade-.70,top);
+  }
+  for(const entry of exteriorWalls)exteriorWall(entry);
+  exteriorBox(778.55,853,779,1114,7.82,8.59,'pinotGris');
+  exteriorBox(778.55,849,779,853,grade-.70,8.59,'pinotGris');
+  const exteriorWells=[
+    {axis:'v',fixed:233,side:-1,a:196,b:277,bounds:[207,191,233,282]},
+    {axis:'v',fixed:779,side:1,a:196,b:277,bounds:[779,191,806,282]},
+    {axis:'v',fixed:779,side:1,a:478,b:558,bounds:[779,473,806,563]}
+  ];
+  for(const {fixed,side,a,b,bounds:[x1,z1,x2,z2]} of exteriorWells){
+    const rim=side>0?x2:x1;
+    exteriorBox(Math.min(rim,rim-side*1.3),z1,Math.max(rim,rim-side*1.3),z2,grade-.82,grade+.25,'steel');
+    for(const z of [z1,z2-1.2])exteriorBox(x1,z,x2,z+1.2,grade-.82,grade+.25,'steel');
+    exteriorBox(x1,z1,x2,z2,grade-.87,grade-.81,'riverRock');
+    const n=Math.min(fixed,fixed+side*.95),f=Math.max(fixed,fixed+side*.95);
+    exteriorBox(n,a,f,b,grade-.48,-1.73,'whiteRailing');
+    exteriorBox(n+side*.24,a+1.6,f+side*.24,b-1.6,grade-.38,-1.84,'exteriorGlass');
+  }
+
+  // Eaves, porch cover and the small returns above the side projections.
+  const roofPoint=(x,y,z)=>[X(x),y,Z(z)];
+  const roofPlane=points=>{
+    const [a,b,c]=points;
+    const up=(b[2]-a[2])*(c[0]-a[0])-(b[0]-a[0])*(c[2]-a[2]);
+    exteriorFace((up<0?[...points].reverse():points).map(p=>roofPoint(...p)),'roofShingles');
+  };
+  function pitchedRoof(x1,z1,x2,z2,eave,ridge,start,end,rearGable=false){
+    const x=(x1+x2)/2;
+    roofPlane([[x1,eave,z1],[x1,eave,z2],[x,ridge,end],[x,ridge,start]]);
+    roofPlane([[x2,eave,z1],[x,ridge,start],[x,ridge,end],[x2,eave,z2]]);
+    roofPlane([[x1,eave,z2],[x2,eave,z2],[x,ridge,end]]);
+    if(!rearGable)roofPlane([[x1,eave,z1],[x,ridge,start],[x2,eave,z1]]);
+    for(const side of [x1,x2-1.35])exteriorBox(side,z1,side+1.35,z2,eave-.27,eave,'terratone');
+    exteriorBox(x1,z2-1.35,x2,z2,eave-.27,eave,'terratone');
+    if(rearGable){
+      for(const edge of [x1,x2]){
+        const slope=[[edge,eave,z1],[x,ridge,z1],[x,ridge-.24,z1],[edge,eave-.24,z1]];
+        exteriorFace(slope.map(p=>roofPoint(...p)),'terratone');
+      }
+    }else exteriorBox(x1,z1,x2,z1+1.35,eave-.27,eave,'terratone');
+    exteriorBox(x-.70,start,x+.70,end,ridge-.047,ridge+.035,'roofCap');
+  }
+  pitchedRoof(215,131,797,1114,8.60,14.07,131,813,true);
+  pitchedRoof(407,805,797,1257,7.82,11.54,942,1073);
+  pitchedRoof(216,1036,448,1292,9.06,11.14,1135,1201);
+  const mainRidgeX=506;
+  const gableY=x=>14.07-(14.07-8.60)*Math.abs(x-mainRidgeX)/291;
+  exteriorFace([[233,8.54,148],[779,8.54,148],[779,gableY(779),148],
+    [mainRidgeX,14.07,148],[233,gableY(233),148]].map(p=>roofPoint(...p)),'pinotGris');
+  for(const [outer,inner,z1,z2,low,high] of [[198,242,298,545,8.40,9.08],[829,774,561,756,8.40,9.09]]){
+    roofPlane([[outer,low,z1],[inner,high,z1],[inner,high,z2],[outer,low,z2]]);
+    exteriorBox(outer-1,z1,outer+1,z2,low-.24,low,'terratone');
+    for(const z of [z1,z2]){
+      exteriorFace([[outer,low-.22,z],[inner,low-.22,z],[inner,high,z],[outer,low,z]].map(p=>roofPoint(...p)),'terratone');
+    }
+  }
+  for(const [x1,x2] of [[233,259],[405,430]])exteriorBox(x1,1240,x2,1275,grade,8.91,'stucco');
+  exteriorBox(233,1082,430,1275,8.45,8.89,'terratone');
+  exteriorBox(259,1268,405,1275,6.91,8.89,'prairieClay');
+  exteriorBox(233,1082,423,1275,foyer-.22,foyer,'concrete');
+  exteriorBox(233,1273.5,423,1275,grade-.05,foyer-.20,'concrete');
+  exteriorBox(233,1082,234.4,1241,grade-.04,foyer-.20,'prairieClay');
+  for(let step=0;step<3;step++){
+    exteriorBox(259,1275+step*10.8,405,1275+(step+1)*10.8,grade-.04,
+      foyer-(foyer-grade)*(step+1)/4,'concrete');
+  }
+  for(const [x,z,top] of [[778,1238,7.65],[236,1069,8.43],[233,151,8.44],[777,151,8.45]]){
+    exteriorBox(x-.7,z-.68,x+.70,z+.68,grade+.29,top,'terratone');
+    exteriorBox(x-.74,z-.72,x+.74,z+3.1,grade+.22,grade+.39,'terratone');
+  }
+
+  // Sod, gravel strips, driveway and a raised black-mulch bed adapted from the example.
+  function siteSurface(x1,z1,x2,z2,y,mat){
+    const wells=exteriorWells.map(w=>w.bounds).filter(([a,b,c,d])=>a<x2&&c>x1&&b<z2&&d>z1);
+    const cuts=(start,end,axis)=>[start,...new Set(wells.flatMap(w=>[w[axis],w[axis+2]]).filter(p=>p>start&&p<end)),end].sort((a,b)=>a-b);
+    const xs=cuts(x1,x2,0),zs=cuts(z1,z2,1);
+    for(let i=1;i<xs.length;i++)for(let j=1;j<zs.length;j++){
+      const x=(xs[i]+xs[i-1])/2,z=(zs[j]+zs[j-1])/2;
+      if(wells.some(([a,b,c,d])=>x>a&&x<c&&z>b&&z<d))continue;
+      landscapeBox(xs[i-1],zs[j-1],xs[i],zs[j],grade-.48,y,mat);
+    }
+  }
+  siteSurface(132,-289,898,1580,grade,'sod');
+  siteSurface(165,148,233,1082,grade+.022,'riverRock');
+  siteSurface(779,148,862,1240,grade+.022,'riverRock');
+  siteSurface(212,148,233,311,grade+.028,'riverRock');
+  landscapeBox(429,1239,779,1580,grade-.20,grade+.075,'concrete');
+  landscapeBox(263,1307,429,1352,grade-.20,grade+.071,'concrete');
+  for(const z of [1344,1458,1571])landscapeBox(429,z,779,z+.72,grade+.074,grade+.078,'landscapeEdging');
+  landscapeBox(603,1239,604,1580,grade+.074,grade+.078,'landscapeEdging');
+
+  const landscapeFace=(p,mat)=>face(p,mat,0,'landscape');
+  function landscapeRings(rings,mat){
+    landscapeFace([...rings[0]].reverse(),mat);landscapeFace(rings.at(-1),mat);
+    for(let j=1;j<rings.length;j++)for(let i=0;i<rings[j].length;i++){
+      const k=(i+1)%rings[j].length;
+      landscapeFace([rings[j-1][i],rings[j-1][k],rings[j][k],rings[j][i]],mat);
+    }
+  }
+  function ellipse(x,z,y,rx,rz,irregularity=0,count=18){
+    return Array.from({length:count},(_,i)=>{
+      const a=-i*2*Math.PI/count,s=1+irregularity*Math.cos(a*3);
+      return [x+s*rx*Math.cos(a),y,z+s*rz*Math.sin(a)];
+    });
+  }
+  const bedPlantX=X(293),bedPlantZ=Z(1420);
+  landscapeRings([ellipse(bedPlantX,bedPlantZ,grade,5.78,4.62,.12),
+    ellipse(bedPlantX,bedPlantZ,grade+.17,5.63,4.47,.12)],'landscapeEdging');
+  landscapeRings([ellipse(bedPlantX,bedPlantZ,grade+.167,5.53,4.36,.12),
+    ellipse(bedPlantX,bedPlantZ,grade+.37,5.26,4.08,.12)],'mulch');
+  landscapeRings([ellipse(X(226),Z(1301),grade,1.62,2.28,.12),
+    ellipse(X(226),Z(1301),grade+.32,1.50,2.13,.12)],'mulch');
+  function canopy(x,z,y,rx,rz,h,mat,seed){
+    landscapeRings([[0,.24],[.21,.76],[.50,1],[.76,.77],[1,.19]].map(([s,r])=>
+      ellipse(x+Math.sin(s*8+seed)*rx*.10,z+Math.cos(s*7+seed)*rz*.08,y+h*s,rx*r,rz*r,.13,10)),mat);
+  }
+  function tree(x,z){
+    landscapeRings([[0,.19],[2.9,.13],[5.7,.075],[7.5,.04]].map(([h,r])=>
+      ellipse(x+h*.048,z-h*.026,grade+.34+h,r,r,.05,9)),'bark');
+    for(let i=0;i<10;i++){
+      const a=i*2.40,r=.65+(i%3)*.46;
+      canopy(x+Math.cos(a)*r,z+Math.sin(a)*r,grade+4.05+i*.27,1.33,1.30,2.0,
+        i%3===0?'foliageLight':'foliage',i);
+    }
+  }
+  tree(X(280),Z(1433));
+  for(const [x,z,spread,h,mat] of [[223,1292,1.0,1.76,'shrubWine'],[235,1321,.89,1.37,'foliage'],
+    [223,1418,1.12,1.62,'foliage'],[310,1383,.84,1.32,'shrubGold'],[247,1464,.90,1.21,'shrubWine'],
+    [323,1468,.89,1.15,'shrubGold'],[335,1424,.88,1.20,'foliageLight'],[276,1472,.72,.96,'foliage']]){
+    const y=grade+.29;
+    canopy(X(x),Z(z),y,spread,spread*.85,h,mat,x);
+    if(mat==='foliage')for(let i=0;i<4;i++){
+      const a=i*2.4;
+      canopy(X(x)+Math.sin(a)*spread*.42,Z(z)+Math.cos(a)*spread*.38,y+h*.73,.21,.23,.30,'bloom',i);
+    }
+  }
+  for(const [x,z] of [[307,1435],[245,1377],[218,1331],[294,1477]]){
+    for(let i=0;i<15;i++){
+      const a=i*2.399,dx=Math.cos(a),dz=Math.sin(a),r=.34+(i%5)*.11,h=1.1+(i%7)*.19;
+      const cx=X(x),cz=Z(z),y=grade+.32;
+      landscapeFace([[cx-dz*.037,y,cz+dx*.037],[cx+dx*r*.46-dz*.026,y+h*.67,cz+dz*r*.46+dx*.026],
+        [cx+dx*r,y+h,cz+dz*r],[cx+dx*r*.46+dz*.026,y+h*.64,cz+dz*r*.46-dx*.026]],'grassBlade');
+    }
+  }
 
   function cabinet(x1,z1,x2,z2,b,t,finish,front,count=1,splits=[],solid=t<4) {
     box(x1,z1,x2,z2,b,t,finish,0,'fixture',solid);
@@ -1586,7 +1818,10 @@ summary{cursor:pointer}
   const furnitureOverlap=new Set();
   furnitureButton.setAttribute('aria-pressed',showFurniture);
   furnitureButton.classList.toggle('btn-primary',showFurniture);
-  let orbitYaw=.38, orbitPitch=.85, orbitZoom=83, measure=[];
+  const dollhouseView={yaw:.38,pitch:.85,zoom:83,minZoom:28,minPitch:.25};
+  const exteriorView={yaw:.025,pitch:.14,zoom:70,minZoom:46,minPitch:.05};
+  const orbitView=()=>mode==='exterior'?exteriorView:dollhouseView;
+  let measure=[];
   let route=[], destination=null, velocityX=0, velocityZ=0;
   function stopWalking(){
     route=[];destination=null;marker.hidden=true;
@@ -1605,10 +1840,12 @@ summary{cursor:pointer}
     levelButton.textContent=planLevel===0?'Show basement':'Show main floor';
     canvas.hidden=mode==='plan';plan.hidden=mode!=='plan';$('.sv-map').hidden=mode!=='walk';
     $('.sv-pad').hidden=mode!=='walk';
-    levelButton.hidden=mode==='walk';reset.hidden=mode!=='plan';
+    levelButton.hidden=mode==='walk'||mode==='exterior';reset.hidden=mode!=='plan';
+    furnitureButton.hidden=mode==='exterior';
+    canvas.setAttribute('aria-label',mode==='walk'?'House walkthrough. Click a floor to walk or drag to look.':'Drag to orbit the 3D model. Scroll or pinch to zoom.');
     $('.sv-help').textContent=mode==='walk'
       ? 'Click or tap the floor to walk · Drag to look · Arrow keys also work'
-      : mode==='orbit' ? 'Drag to rotate · scroll or pinch to zoom'
+      : (mode==='orbit'||mode==='exterior') ? 'Drag to rotate · scroll or pinch to zoom'
       : 'Select two points to measure their straight-line distance.';
     root.querySelectorAll('[data-mode]').forEach(el=>{
       const active=el.dataset.mode===mode;
@@ -1699,6 +1936,25 @@ summary{cursor:pointer}
         float soft=smoothstep(.55,.93,.61+view.y*.38+q.y*.04);
         gl_FragColor=vec4(tint*(.70+soft*.36)+vec3(.012,.016,.023)*soft,1.0);
         return;
+      }
+      if(style==17.0){
+        vec2 run=abs(N.z)>abs(N.x)?q.xz:q.zx;
+        float course=run.y/.56;
+        float tile=run.x/1.02+mod(floor(course),2.0)*.46;
+        detail=.79+.22*hash(vec2(floor(tile),floor(course)))+.11*grain(run*24.0);
+        detail-=.14*(1.0-smoothstep(.0,.075,fract(course)));
+        detail-=.07*(1.0-smoothstep(.0,.035,fract(tile)));
+      }
+      if(style==18.0){
+        float sheen=.79+.28*smoothstep(.15,.72,.56+view.y*.30+grain(p*.74)*.25);
+        gl_FragColor=vec4(tint*sheen+vec3(.06,.09,.105),1.0);return;
+      }
+      if(style==19.0)detail=.91+.09*smoothstep(.025,.075,fract(q.y/.42))+.038*grain(p*11.0);
+      if(style==20.0)detail=.79+.17*grain(p*1.6)+.16*grain(p*26.0);
+      if(style==21.0){
+        vec2 stone=p*8.0;
+        vec2 cell=floor(stone);
+        detail=.74+.22*hash(cell)+.19*smoothstep(.07,.24,min(fract(stone.x),fract(stone.y)));
       }
       if(style==16.0){
         detail=.96+.06*grain(p*87.0);
@@ -1803,13 +2059,14 @@ summary{cursor:pointer}
     if(!gpu)return;
     const moving=route.length>0||Math.abs(velocityX)+Math.abs(velocityZ)>.013||touches.size>0||keys.size>0;
     const [w,h]=size(canvas,moving?motionPixels:1250000);
-    const orbit=mode==='orbit',cut=planLevel;
+    const exterior=mode==='exterior',orbit=mode==='orbit'||exterior,cut=planLevel;
     const forward=lookDirection();
     let eye=[x,eyeY,z],direction=forward;
     if(orbit){
-      const zoom=orbitZoom*Math.max(1,.95/(w/h));
-      const center=[15,cut?basement+1:0,cut?25:32];
-      direction=[-Math.sin(orbitYaw)*Math.cos(orbitPitch),-Math.sin(orbitPitch),-Math.cos(orbitYaw)*Math.cos(orbitPitch)];
+      const view=orbitView();
+      const zoom=view.zoom*Math.max(1,(exterior?1.06:.95)/(w/h));
+      const center=exterior?[15.5,4.1,36.5]:[15,cut?basement+1:0,cut?25:32];
+      direction=[-Math.sin(view.yaw)*Math.cos(view.pitch),-Math.sin(view.pitch),-Math.cos(view.yaw)*Math.cos(view.pitch)];
       eye=center.map((v,i)=>v-direction[i]*zoom);
     }
     const key=[w,h,mode,cut,showFurniture,...eye,...direction,destination?.x,destination?.z].map(v=>typeof v==='number'?v.toFixed(5):v).join('/');
@@ -1822,8 +2079,10 @@ summary{cursor:pointer}
     gl.uniform3fv(gpu.eye,eye);
     gl.uniform4f(gpu.floorLamp,lampX,lampY,lampZ,showFurniture?.24:0);
     const draw=m=>{
+      const outdoor=m.group==='exterior'||m.group==='landscape';
+      if(outdoor!==exterior)return;
       if(m.group==='furniture'&&!showFurniture)return;
-      if(orbit&&(m.group==='ceiling'||(m.level!==cut&&m.group!=='stair')||(cut&&m.group==='stair'&&m.level!==1)))return;
+      if(orbit&&!exterior&&(m.group==='ceiling'||(m.level!==cut&&m.group!=='stair')||(cut&&m.group==='stair'&&m.level!==1)))return;
       if(m.group==='site'&&(orbit||feet< -3.5))return;
       gl.bindBuffer(gl.ARRAY_BUFFER,m.buffer);
       gl.vertexAttribPointer(gpu.pos,3,gl.FLOAT,false,24,0);
@@ -1928,7 +2187,7 @@ summary{cursor:pointer}
     if(!target||permitted(target.x,target.z,target.y)===undefined)return;
     // Pick through open doorways, but stop at any nearer rendered solid.
     for(const mesh of buckets.values()){
-      if(mesh.group==='site'||mesh.mat==='clear'||mesh.mat.startsWith('rug')||(mesh.group==='furniture'&&!showFurniture))continue;
+      if(mesh.group==='site'||mesh.group==='exterior'||mesh.group==='landscape'||mesh.mat==='clear'||mesh.mat.startsWith('rug')||(mesh.group==='furniture'&&!showFurniture))continue;
       const d=mesh.data;
       for(let i=0;i<d.length;i+=18){
         const n=[d[i+3],d[i+4],d[i+5]],div=dot(n,direction);
@@ -2018,6 +2277,7 @@ summary{cursor:pointer}
       const [[a,b],[c,d]]=measure,dist=Math.hypot(c-a,d-b);
       title=`${imperial(dist)}  ·  ${(dist*.3048).toFixed(2)} m`;
     }else if(mode==='plan'&&measure.length===1)title='Select the second point';
+    else if(mode==='exterior')title='Exterior · Elevation A';
     else if(mode!=='walk')title=planLevel?'Basement · unfinished':'Main floor · 1,421 sq ft';
     else{
       const level=feet<-5?1:0;
@@ -2101,9 +2361,11 @@ summary{cursor:pointer}
       }
     }else if(other){
       const old=Math.hypot(a-other.x,b-other.y),next=Math.hypot(e.clientX-other.x,e.clientY-other.y);
-      if(next>1)orbitZoom=limit(orbitZoom*old/next,28,135);
+      const view=orbitView();
+      if(next>1)view.zoom=limit(view.zoom*old/next,view.minZoom,135);
     }else{
-      orbitYaw-=dx*.008;orbitPitch=limit(orbitPitch+dy*.008,.25,1.55);
+      const view=orbitView();
+      view.yaw-=dx*.008;view.pitch=limit(view.pitch+dy*.008,view.minPitch,1.55);
     }
   });
   canvas.addEventListener('pointerup',e=>{
@@ -2119,8 +2381,9 @@ summary{cursor:pointer}
   });
   for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,e=>touches.delete(e.pointerId));
   canvas.addEventListener('wheel',e=>{
-    if(mode!=='orbit')return;
-    e.preventDefault();orbitZoom=limit(orbitZoom*Math.exp(e.deltaY*.001),28,135);
+    if(mode!=='orbit'&&mode!=='exterior')return;
+    const view=orbitView();
+    e.preventDefault();view.zoom=limit(view.zoom*Math.exp(e.deltaY*.001),view.minZoom,135);
   },{passive:false});
   let time=0,motionPixels=480000;
   function animate(t){
@@ -2180,7 +2443,7 @@ summary{cursor:pointer}
   requestAnimationFrame(animate);
 
   function glb(){
-    const asset={asset:{version:'2.0',generator:'Seville walkthrough'},scene:0,scenes:[{nodes:[]}],nodes:[],meshes:[],materials:[],accessors:[],bufferViews:[],buffers:[{byteLength:0}]};
+    const asset={asset:{version:'2.0',generator:'Seville walkthrough'},scene:mode==='exterior'?1:0,scenes:[{name:'Interior',nodes:[]},{name:'Exterior',nodes:[]}],nodes:[],meshes:[],materials:[],accessors:[],bufferViews:[],buffers:[{byteLength:0}]};
     const materials=Object.entries(palette);
     const parts=[];
     for(const [,m] of materials)asset.materials.push({
@@ -2190,11 +2453,12 @@ summary{cursor:pointer}
         metallicFactor:m.style===16?.36:m.style===5?.48:0
       }
     });
-    for(const level of [0,1]){
+    for(const [level,name] of [[0,'Main floor and garage'],[1,'Basement and staircase'],[null,'Exterior and landscaping']]){
       const idx=asset.nodes.length;
-      asset.scenes[0].nodes.push(idx);asset.nodes.push({name:level?'Basement and staircase':'Main floor and garage',children:[]});
+      asset.scenes[level===null?1:0].nodes.push(idx);asset.nodes.push({name,children:[]});
       for(const m of buckets.values()){
-        if(m.level!==level||m.group==='site'||(m.group==='furniture'&&!showFurniture))continue;
+        const outdoor=m.group==='exterior'||m.group==='landscape';
+        if(outdoor!==(level===null)||(!outdoor&&m.level!==level)||m.group==='site'||(m.group==='furniture'&&!showFurniture))continue;
         const data=new Float32Array(m.data),min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
         for(let i=0;i<data.length;i+=6)for(let j=0;j<3;j++){
           const d=data[i+j]*.3048;data[i+j]=d;min[j]=Math.min(min[j],d);max[j]=Math.max(max[j],d);
