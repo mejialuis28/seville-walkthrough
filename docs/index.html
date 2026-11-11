@@ -1222,7 +1222,7 @@ summary{cursor:pointer}
   footprint(sleeperX,sleeperZ,sleeperWidth,sleeperDepth,'#899584');
 
   // Bedroom 3: desk and headboard share the garage-side wall; the TV faces the bed.
-  const guestHead=Z(843),guestBedX=X(688),guestBedZ=guestHead-.24-mattressLength/2;
+  const guestHead=Z(843),guestBedX=X(728.5),guestBedZ=guestHead-.24-mattressLength/2;
   const guestFrameWidth=mattressWidth+.18,guestFrameLength=mattressLength+.23;
   for(const side of [-1,1])for(const end of [-1,1]){
     furnishingBox(guestBedX+side*(guestFrameWidth/2-.115),guestBedZ+end*(guestFrameLength/2-.13),
@@ -1259,13 +1259,40 @@ summary{cursor:pointer}
   }
   footprint(guestBedX,guestBedZ+.04,guestFrameWidth,guestFrameLength+.22,'#879bb1');
 
+  // Round black tray table at the open side of the bed.
+  const guestTableX=X(673.5),guestTableZ=Z(831),guestTableRadius=7/12,guestTableHeight=20/12;
+  loft([
+    circle(guestTableX,guestTableZ,guestTableHeight-.055,guestTableRadius-.025),
+    circle(guestTableX,guestTableZ,guestTableHeight,guestTableRadius)
+  ],'black');
+  const trayOuter=circle(guestTableX,guestTableZ,guestTableHeight,guestTableRadius);
+  const trayLip=circle(guestTableX,guestTableZ,guestTableHeight+.035,guestTableRadius);
+  const trayInner=circle(guestTableX,guestTableZ,guestTableHeight+.035,guestTableRadius-.036);
+  for(let i=0;i<trayLip.length;i++){
+    const j=(i+1)%trayLip.length;
+    furnitureFace([trayOuter[i],trayOuter[j],trayLip[j],trayLip[i]],'black');
+    furnitureFace([trayLip[i],trayLip[j],trayInner[j],trayInner[i]],'black');
+  }
+  for(const side of [-1,1])for(const end of [-1,1]){
+    loft([
+      circle(guestTableX+side*.36,guestTableZ+end*.36,0,.026),
+      circle(guestTableX+side*.29,guestTableZ+end*.29,guestTableHeight-.035,.028)
+    ],'black');
+  }
+  for(const angle of [-Math.PI/4,Math.PI/4]){
+    loft([.32,.355].map(y=>roundedRect(0,0,y,.95,.045,.015).map(([x,h,z])=>
+      [guestTableX+x*Math.cos(angle)-z*Math.sin(angle),h,guestTableZ+x*Math.sin(angle)+z*Math.cos(angle)]
+    )),'black');
+  }
+  footprint(guestTableX,guestTableZ,guestTableRadius*2,guestTableRadius*2,'#292a29');
+
   const guestTvZ=Z(662.4),guestTvScale=(43/12)/Math.hypot(16,9);
   const guestTvBottom=3.50,guestTvTop=guestTvBottom+9*guestTvScale;
   furnishingBox(guestBedX,Z(662.0),1.02,.19,4.08,4.55,'black');
   furnishingBox(guestBedX,guestTvZ+.10,16*guestTvScale+.055,.101,guestTvBottom-.03,guestTvTop+.025,'black');
   furnishingBox(guestBedX,guestTvZ+.154,16*guestTvScale,.013,guestTvBottom,guestTvTop,'workScreenDark');
 
-  const workX=X(589),workBack=Z(843),workWidth=58/12,workDepth=24/12,workHeight=30/12;
+  const workX=X(617),workBack=Z(843),workWidth=58/12,workDepth=24/12,workHeight=30/12;
   const workZ=workBack-workDepth/2,workFront=workBack-workDepth;
   cushion(workX,workZ,workWidth,workDepth,workHeight-.11,.11,.11,'workDeskWood',.024);
   furnishingBox(workX,workZ+.19,workWidth-.58,.14,2.29,2.41,officeHardware);
@@ -1532,7 +1559,7 @@ summary{cursor:pointer}
     {name:'Ensuite',p:[501,237],target:[456,270],area:[442,155,531,318]},
     {name:'Walk-in closet',p:[494,381],target:[445,419],area:[442,322,531,445]},
     {name:'Bedroom 2',dim:'9′8″ × 10′0″',p:[611,584],target:[679,502],pitch:-.28,area:[598,480,772,657]},
-    {name:'Bedroom 3',dim:'13′3″ × 10′3″',p:[592,707],target:[657,790],pitch:-.27,area:[536,662,772,847]},
+    {name:'Bedroom 3',dim:'13′3″ × 10′3″',p:[614,693],target:[680,791],pitch:-.32,area:[536,662,772,847]},
     {name:'Hall bath',p:[653,450],target:[731,400],area:[598,385,772,475]},
     {name:'Garage',dim:'20′0″ × 22′0″ nominal',p:[742,1218],target:[600,1055],pitch:-.29,y:garage,area:[429,854,771,1235]},
     {name:'Unfinished basement',p:[570,799],target:[521,272],y:basement,area:[240,160,771,1080],level:1}
