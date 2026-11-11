@@ -1074,7 +1074,7 @@ summary{cursor:pointer}
   footprint(taosX,taosZ+2.05,taosMirrors,.68,'#626970',true,garage);
   footprint(taosX,taosZ-2.03,4.69,6.64,'#9499a0',false,garage);
   const rooms = [
-    {name:'Foyer',p:[336,1001],target:[302,808],pitch:-.20,y:foyer,area:[240,854,423,1073]},
+    {name:'Foyer',p:[320,1059],target:[302,808],pitch:-.12,y:foyer,area:[240,854,423,1073]},
     {name:'Great room',dim:'16′4″ × 13′8″',p:[309,623],target:[478,682],pitch:-.20,area:[242,537,530,770]},
     {name:'Kitchen',dim:'12′3″ × 12′0″',p:[399,499],target:[262,384],area:[216,311,438,536]},
     {name:'Dining room',dim:'11′1″ × 8′11″',p:[404,307],target:[355,210],pitch:-.31,area:[242,155,438,311]},
@@ -1123,7 +1123,7 @@ summary{cursor:pointer}
       el.classList.toggle('btn-primary',active);el.setAttribute('aria-pressed',active);
     });
   }
-  go(rooms[1]);
+  go(rooms[0]);
   const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
   const vertex=`
     attribute vec3 position, normal;
