@@ -127,6 +127,13 @@ summary{cursor:pointer}
   material('stem','Rubber plant stems','526047');
   material('leaf','Rubber plant deep green','38523c',13);
   material('leafLight','Rubber plant fresh green','58714b',13);
+  material('bedUpholstery','Charcoal upholstered bed frame','44454b',2);
+  material('bedPanel','Charcoal inset headboard panel','4b4c53',2);
+  material('bedLinen','Warm ivory bed linen','e6ded1',2);
+  material('bedQuilt','Taupe bed quilt','b5a69c',2);
+  material('bedPattern','Charcoal quilt pattern','635951',2);
+  material('nightstandGray','Graphite gray nightstands','585a5e');
+  material('nightstandInset','Gray nightstand drawer panels','737479');
   material('sofaFrame','Charcoal-gray upholstery','3f4144',2);
   material('sofaCushion','Charcoal-gray cushion fabric','505258',2);
   material('sofaPiping','Charcoal upholstery piping','35373a',2);
@@ -955,6 +962,67 @@ summary{cursor:pointer}
   }
   plantStand(Z(589),0);plantStand(Z(727),1);
 
+  // Full/double mattress: 54 by 75 inches. The headboard faces the wall between the two doors.
+  const bedHead=X(769),bedZ=Z(267.5),mattressLength=75/12,mattressWidth=54/12;
+  const bedX=bedHead-.32-mattressLength/2;
+  const frameLength=mattressLength+.25,frameWidth=mattressWidth+.24;
+  for(const end of [-1,1])for(const side of [-1,1]){
+    furnishingBox(bedX+end*(frameLength/2-.24),bedZ+side*(frameWidth/2-.22),.20,.20,0,.24,'black');
+  }
+  cushion(bedX,bedZ,frameLength,frameWidth,.20,.83,.16,'bedUpholstery',.055);
+  cushion(bedHead-.14,bedZ,.28,frameWidth+.08,.20,3.93,.13,'bedUpholstery',.04);
+  const panelX=bedHead-.31;
+  cushion(panelX,bedZ,.15,frameWidth-.38,1.75,2.13,.07,'bedPanel',.028);
+  for(const offset of [-1.64,-.98,-.33,.33,.98,1.64]){
+    loft([[0,.038],[.035,.048],[.060,.032]].map(([depth,r])=>
+      circle(0,bedZ+offset,0,r).map(([y,,z])=>[panelX-.055-depth,3.30+y,z])
+    ),'bedUpholstery');
+  }
+  cushion(bedX,bedZ,mattressLength,mattressWidth,1.02,.81,.24,'bedLinen',.07);
+  const quiltLength=4.74,quiltWidth=4.64,quiltX=bedX-.76;
+  cushion(quiltX,bedZ,quiltLength,quiltWidth,1.61,.29,.23,'bedQuilt',.065);
+  for(const side of [-1,1]){
+    const pillowX=bedHead-.92,pillowZ=bedZ+side*1.11;
+    loft([
+      [0,.80,1.85,.22],[.10,1.08,2.08,.30],[.27,1.01,2.02,.31],[.34,.74,1.81,.23]
+    ].map(([y,d,w,r])=>roundedRect(0,pillowZ,y,d,w,r).map(([x,h,z])=>
+      [pillowX+.85*x+.53*h,1.85-.53*x+.85*h,z]
+    )),'bedLinen');
+  }
+  const quiltY=1.902,patternWidth=4.30;
+  for(const band of [-1.77,-.62,.57,1.53]){
+    furnishingBox(quiltX+band,bedZ,.047,patternWidth,1.897,quiltY,'bedPattern');
+  }
+  for(const band of [-1.20,-.02,1.06]){
+    for(let cell=0;cell<8;cell++){
+      const z=bedZ+(cell-3.5)*.52;
+      for(const stripe of [-.095,.095]){
+        const x=quiltX+band+stripe;
+        furnitureFace([[x-.12,quiltY,z-.26],[x+.13,quiltY,z],[x+.062,quiltY,z],[x-.19,quiltY,z-.26]].reverse(),'bedPattern');
+        furnitureFace([[x+.13,quiltY,z],[x-.12,quiltY,z+.26],[x-.19,quiltY,z+.26],[x+.062,quiltY,z]].reverse(),'bedPattern');
+      }
+    }
+  }
+  footprint(bedX+.11,bedZ,frameLength+.22,frameWidth+.08,'#a89990');
+
+  // Matching gray nightstands with an open shelf and a lower inset drawer.
+  const nightstandDepth=16/12,nightstandWidth=19/12,nightstandX=bedHead-nightstandDepth/2;
+  const nightstandFront=nightstandX-nightstandDepth/2;
+  for(const side of [-1,1]){
+    const z=bedZ+side*(frameWidth/2+nightstandWidth/2+.29);
+    furnishingBox(nightstandX,z,nightstandDepth,nightstandWidth,1.83,1.92,'nightstandGray');
+    furnishingBox(nightstandX+.03,z,nightstandDepth-.08,nightstandWidth-.05,.99,1.06,'nightstandGray');
+    furnishingBox(nightstandX+.04,z,nightstandDepth-.13,nightstandWidth-.14,.12,.23,'nightstandGray');
+    furnishingBox(bedHead-.06,z,.085,nightstandWidth-.06,.23,1.83,'nightstandGray');
+    for(const edge of [-1,1]){
+      furnishingBox(nightstandX+.022,z+edge*(nightstandWidth/2-.062),nightstandDepth-.066,.095,.025,1.83,'nightstandGray');
+    }
+    furnishingBox(nightstandFront+.04,z,.085,nightstandWidth-.28,.24,.97,'nightstandGray');
+    furnishingBox(nightstandFront-.008,z,.015,nightstandWidth-.48,.32,.80,'nightstandInset');
+    furnishingBox(nightstandFront-.047,z,.08,.47,.846,.906,'nightstandGray');
+    footprint(nightstandX-.04,z,nightstandDepth+.08,nightstandWidth,'#585a5e');
+  }
+
   // Canadian 2026 Taos 4MOTION dimensions. Positive Z faces the garage door.
   const taosX=X((431+771)/2),taosZ=Z((853+1232)/2);
   const taosLength=4467/304.8,taosWidth=1841/304.8,taosMirrors=2097/304.8;
@@ -1113,7 +1181,7 @@ summary{cursor:pointer}
     {name:'Great room',dim:'16′4″ × 13′8″',p:[309,623],target:[478,682],pitch:-.20,area:[242,537,530,770]},
     {name:'Kitchen',dim:'12′3″ × 12′0″',p:[399,499],target:[262,384],area:[216,311,438,536]},
     {name:'Dining room',dim:'11′1″ × 8′11″',p:[404,307],target:[355,210],pitch:-.31,area:[242,155,438,311]},
-    {name:'Primary bedroom',dim:'13′3″ × 12′8″',p:[656,339],target:[667,150],area:[537,154,772,381]},
+    {name:'Primary bedroom',dim:'13′3″ × 12′8″',p:[570,297],target:[711,267.5],pitch:-.30,area:[537,154,772,381]},
     {name:'Ensuite',p:[501,237],target:[456,270],area:[442,155,531,318]},
     {name:'Walk-in closet',p:[494,381],target:[445,419],area:[442,322,531,445]},
     {name:'Bedroom 2',dim:'9′8″ × 10′0″',p:[662,604],target:[770,525],area:[598,480,772,657]},
