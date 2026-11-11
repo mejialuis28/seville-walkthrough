@@ -117,7 +117,7 @@ summary{cursor:pointer}
   material('lightingBlack','Black ceiling fixture trim','282829');
   material('ground','Site ground, illustrative','a6ae93',9);
   material('lamp','White disc diffuser','fff5d9',10);
-  material('diningOak','Natural oak dining furniture','ae8460',6);
+  material('diningChairWhite','Warm white cross-back dining chair frame','eee9df');
   material('diningWhite','Satin white dining table','f7f5ef');
   material('linen','Oatmeal woven upholstery','c7bba7',2);
   material('stoolCream','Cream woven island stool upholstery','e1cfb6',2);
@@ -666,7 +666,7 @@ summary{cursor:pointer}
       roundedRect(x,z,y+thickness,w-2*bevel,d-2*bevel,radius-bevel)
     ],mat);
   }
-  function leg(x,z,leanX,leanZ,height,top,bottom,mat='diningOak'){
+  function leg(x,z,leanX,leanZ,height,top,bottom,mat){
     loft([
       roundedRect(x+leanX,z+leanZ,0,bottom,bottom,.016),
       roundedRect(x,z,height,top,top,.018)
@@ -683,20 +683,34 @@ summary{cursor:pointer}
   }
   for(const dx of [-1.44,1.44])for(const side of [-1,1]){
     const cx=diningX+dx,cz=diningZ+side*1.04;
-    cushion(cx,cz,1.51,1.48,1.38,.14,.11,'diningOak');
-    cushion(cx,cz,1.42,1.39,1.50,.13,.16,'linen');
-    for(const a of [-1,1])for(const b of [-1,1])leg(cx+a*.57,cz+b*.53,a*.068,b*.10,1.41,.114,.073);
-    for(const a of [-1,1])loft([
-      roundedRect(cx+a*.57,cz+side*.55,1.44,.116,.116,.020),
-      roundedRect(cx+a*.57,cz+side*.77,2.85,.092,.102,.020)
-    ],'diningOak');
+    const frame='diningChairWhite';
+    cushion(cx,cz,1.49,1.44,1.32,.18,.07,frame,.018);
+    cushion(cx,cz-side*.035,1.46,1.41,1.49,.16,.16,'linen',.05);
+    for(const end of [-1,1]){
+      leg(cx+end*.59,cz-side*.55,end*.025,-side*.02,1.39,.132,.088,frame);
+      loft([
+        roundedRect(cx+end*.62,cz+side*.65,0,.094,.104,.015),
+        roundedRect(cx+end*.60,cz+side*.56,1.41,.135,.136,.018),
+        roundedRect(cx+end*.61,cz+side*.63,1.80,.132,.133,.018),
+        roundedRect(cx+end*.64,cz+side*.78,3.04,.119,.124,.018)
+      ],frame);
+      // The diagonals meet at the center of the open back.
+      loft([
+        roundedRect(cx+end*.54,cz+side*(.62+end*.005),1.78,.128,.062,.011),
+        roundedRect(cx-end*.58,cz+side*(.746+end*.005),2.83,.128,.062,.011)
+      ],frame);
+    }
+    cushion(cx,cz+side*.62,1.21,.13,1.67,.13,.055,frame,.022);
     loft([
-      roundedRect(cx,cz+side*.71,2.28,1.29,.15,.07),
-      roundedRect(cx,cz+side*.78,2.51,1.39,.18,.08),
-      roundedRect(cx,cz+side*.80,2.85,1.32,.15,.07),
-      roundedRect(cx,cz+side*.80,2.88,1.24,.10,.045)
-    ],'linen');
-    footprint(cx,cz+side*.07,1.52,1.71,'#c8b59d');
+      [2.76,.729,1.37,.108,.045],
+      [2.80,.741,1.49,.145,.061],
+      [3.10,.778,1.56,.145,.063],
+      [3.16,.780,1.47,.100,.044]
+    ].map(([y,z,w,d,r])=>
+      roundedRect(cx,cz+side*z,y,w,d,r).map(([px,py,pz])=>
+        [px,py,pz+side*.045*(1-((px-cx)/(w/2))**2)])
+    ),frame);
+    footprint(cx,cz+side*.07,1.57,1.71,'#c8b59d');
   }
   footprint(diningX,diningZ,tableWidth,tableDepth,'#f6f3ea');
   const plantX=X(413),plantZ=Z(180);
