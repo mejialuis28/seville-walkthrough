@@ -1125,51 +1125,64 @@ summary{cursor:pointer}
   }
   footprint(deskX,deskZ,deskWidth,deskDepth,'#f6f3ea');
 
-  function officeScreen(x,z,bottom,width,height,front,lit){
-    furnishingBox(x,z,width+.056,.067,bottom-.031,bottom+height+.027,officeHardware);
-    furnishingBox(x,z+front*.036,width,.011,bottom,bottom+height,lit?'officeDisplay':'workScreenDark');
+  const furnitureGeometry={box:furnishingBox,cushion,loft,face:furnitureFace,footprint};
+  // Rotate the local furniture axes before emitting meshes and walking bounds.
+  function quarterTurnFurniture(direction){
+    const turn=([x,y,z])=>[direction*z,y,-direction*x];
+    return {
+      box:(x,z,w,d,b,t,mat)=>furnishingBox(direction*z,-direction*x,d,w,b,t,mat),
+      cushion:(x,z,w,d,y,h,r,mat,bevel)=>cushion(direction*z,-direction*x,d,w,y,h,r,mat,bevel),
+      loft:(rings,mat)=>loft(rings.map(ring=>ring.map(turn)),mat),
+      face:(points,mat)=>furnitureFace(points.map(turn),mat),
+      footprint:(x,z,w,d,color)=>footprint(direction*z,-direction*x,d,w,color)
+    };
+  }
+
+  function officeScreen(x,z,bottom,width,height,front,lit,geometry){
+    geometry.box(x,z,width+.056,.067,bottom-.031,bottom+height+.027,officeHardware);
+    geometry.box(x,z+front*.036,width,.011,bottom,bottom+height,lit?'officeDisplay':'workScreenDark');
     if(!lit)return;
-    furnishingBox(x,z+front*.043,width-.028,.006,bottom+height*.85,bottom+height*.96,'officeDisplayInk');
+    geometry.box(x,z+front*.043,width-.028,.006,bottom+height*.85,bottom+height*.96,'officeDisplayInk');
     for(let row=0;row<4;row++){
       const y=bottom+height*(.21+row*.146);
-      furnishingBox(x-width*.23,z+front*.043,width*.38,.006,y,y+height*.025,'officeDisplayInk');
-      furnishingBox(x+width*.22,z+front*.043,width*(.29-row*.028),.006,y,y+height*.025,'officeDisplayInk');
+      geometry.box(x-width*.23,z+front*.043,width*.38,.006,y,y+height*.025,'officeDisplayInk');
+      geometry.box(x+width*.22,z+front*.043,width*(.29-row*.028),.006,y,y+height*.025,'officeDisplayInk');
     }
   }
-  function officeEquipment(deskX,deskBack,deskFront,deskHeight,front,lit){
+  function officeEquipment(deskX,deskBack,deskFront,deskHeight,front,lit,geometry=furnitureGeometry){
     const monitorZ=deskBack+front*.37,monitorBottom=deskHeight+.36;
     for(const side of [-1,1]){
       const x=deskX+front*side*1.29;
-      cushion(x,monitorZ+front*.04,.52,.39,deskHeight,.045,.15,officeHardware,.014);
-      furnishingBox(x,monitorZ-front*.02,.105,.086,deskHeight+.03,monitorBottom+.26,officeHardware);
-      officeScreen(x,monitorZ,monitorBottom,1.72,.97,front,lit);
+      geometry.cushion(x,monitorZ+front*.04,.52,.39,deskHeight,.045,.15,officeHardware,.014);
+      geometry.box(x,monitorZ-front*.02,.105,.086,deskHeight+.03,monitorBottom+.26,officeHardware);
+      officeScreen(x,monitorZ,monitorBottom,1.72,.97,front,lit,geometry);
     }
     const laptopZ=deskBack+front*.63;
-    cushion(deskX,laptopZ+front*.27,1.10,.73,deskHeight,.045,.045,lit?'steel':officeHardware,.012);
-    officeScreen(deskX,laptopZ,deskHeight+.033,1.04,.59,front,lit);
-    cushion(deskX,deskFront-front*.45,2.02,.69,deskHeight,.012,.066,'pillowInk',.005);
-    cushion(deskX-front*.18,deskFront-front*.43,1.36,.40,deskHeight+.013,.051,.035,officeHardware,.014);
+    geometry.cushion(deskX,laptopZ+front*.27,1.10,.73,deskHeight,.045,.045,lit?'steel':officeHardware,.012);
+    officeScreen(deskX,laptopZ,deskHeight+.033,1.04,.59,front,lit,geometry);
+    geometry.cushion(deskX,deskFront-front*.45,2.02,.69,deskHeight,.012,.066,'pillowInk',.005);
+    geometry.cushion(deskX-front*.18,deskFront-front*.43,1.36,.40,deskHeight+.013,.051,.035,officeHardware,.014);
     for(let row=0;row<4;row++){
       for(let key=0;key<13;key++){
-        furnishingBox(deskX-front*.18+front*(key-6)*.096,deskFront-front*.43+front*(row-1.5)*.077,
+        geometry.box(deskX-front*.18+front*(key-6)*.096,deskFront-front*.43+front*(row-1.5)*.077,
           .079,.061,deskHeight+.059,deskHeight+.071,'sofaFrame');
       }
     }
-    cushion(deskX+front*.75,deskFront-front*.43,.23,.35,deskHeight+.013,.091,.105,officeHardware,.035);
+    geometry.cushion(deskX+front*.75,deskFront-front*.43,.23,.35,deskHeight+.013,.091,.105,officeHardware,.035);
   }
-  function rollingOfficeChair(deskX,deskFront,front,meshChair=false){
+  function rollingOfficeChair(deskX,deskFront,front,meshChair=false,geometry=furnitureGeometry){
     const chairFabric=meshChair?'workMesh':'officeChair';
     const officeChairZ=deskFront+front*1.06;
-    loft([circle(deskX,officeChairZ,.17,.115),circle(deskX,officeChairZ,1.38,.09)],officeHardware);
+    geometry.loft([circle(deskX,officeChairZ,.17,.115),circle(deskX,officeChairZ,1.38,.09)],officeHardware);
     for(let i=0;i<5;i++){
       const angle=i*2*Math.PI/5+(front<0?Math.PI:0),dx=Math.cos(angle),dz=Math.sin(angle);
       const wheelX=deskX+dx*.94,wheelZ=officeChairZ+dz*.94;
       const spoke=(reach,y,width)=>[[-1,-1],[-1,1],[1,1],[1,-1]].map(([end,side])=>
         [deskX+dx*(reach+end*.055)-dz*side*width,y,officeChairZ+dz*(reach+end*.055)+dx*side*width]);
-      loft([spoke(.95,.15,.074),spoke(.10,.24,.099)],officeHardware);
-      loft([[0,.042],[.055,.086],[.14,.086],[.18,.042]].map(([y,r])=>circle(wheelX,wheelZ,y,r)),officeHardware);
+      geometry.loft([spoke(.95,.15,.074),spoke(.10,.24,.099)],officeHardware);
+      geometry.loft([[0,.042],[.055,.086],[.14,.086],[.18,.042]].map(([y,r])=>circle(wheelX,wheelZ,y,r)),officeHardware);
     }
-    cushion(deskX,officeChairZ-front*.07,1.69,1.57,1.32,.27,.22,chairFabric,.063);
+    geometry.cushion(deskX,officeChairZ-front*.07,1.69,1.57,1.32,.27,.22,chairFabric,.063);
     const backProfile=meshChair?[
       [1.40,.57,1.39,.25],[1.61,.62,1.61,.27],[2.08,.78,1.59,.22],
       [2.71,.89,1.68,.22],[3.27,.97,1.51,.20],[3.41,.98,1.30,.18]
@@ -1177,20 +1190,20 @@ summary{cursor:pointer}
       [1.40,.57,1.50,.28],[1.62,.63,1.74,.32],[2.48,.76,1.60,.30],
       [3.14,.87,1.76,.30],[3.78,.97,1.50,.27],[3.96,.99,1.19,.20]
     ];
-    loft(backProfile.map(([y,z,w,d])=>roundedRect(deskX,officeChairZ+front*z,y,w,d,meshChair?.085:.091)),
+    geometry.loft(backProfile.map(([y,z,w,d])=>roundedRect(deskX,officeChairZ+front*z,y,w,d,meshChair?.085:.091)),
       meshChair?officeHardware:chairFabric);
     if(meshChair){
-      loft(backProfile.map(([y,z,w,d])=>
+      geometry.loft(backProfile.map(([y,z,w,d])=>
         roundedRect(deskX,officeChairZ+front*(z-.095),y+.016,w-.13,d-.09,.035)),chairFabric);
-      furnishingBox(deskX,officeChairZ+front*.97,.22,.095,3.34,3.60,officeHardware);
-      cushion(deskX,officeChairZ+front*.96,.92,.22,3.56,.22,.095,chairFabric,.055);
+      geometry.box(deskX,officeChairZ+front*.97,.22,.095,3.34,3.60,officeHardware);
+      geometry.cushion(deskX,officeChairZ+front*.96,.92,.22,3.56,.22,.095,chairFabric,.055);
     }
     for(const side of [-1,1]){
       const x=deskX+side*.91;
-      furnishingBox(x,officeChairZ+front*.19,.092,.13,1.43,2.06,officeHardware);
-      cushion(x,officeChairZ+front*.06,.185,.73,2.04,.10,.069,officeHardware,.026);
+      geometry.box(x,officeChairZ+front*.19,.092,.13,1.43,2.06,officeHardware);
+      geometry.cushion(x,officeChairZ+front*.06,.185,.73,2.04,.10,.069,officeHardware,.026);
     }
-    footprint(deskX,officeChairZ+front*.055,2.04,2.24,'#41454b');
+    geometry.footprint(deskX,officeChairZ+front*.055,2.04,2.24,'#41454b');
   }
   officeEquipment(deskX,deskBack,deskFront,deskHeight,1,true);
   rollingOfficeChair(deskX,deskFront,1);
@@ -1221,7 +1234,7 @@ summary{cursor:pointer}
   }
   footprint(sleeperX,sleeperZ,sleeperWidth,sleeperDepth,'#899584');
 
-  // Bedroom 3: desk and headboard share the garage-side wall; the TV faces the bed.
+  // Bedroom 3: the headboard sits by the garage wall, opposite the TV.
   const guestHead=Z(843),guestBedX=X(728.5),guestBedZ=guestHead-.24-mattressLength/2;
   const guestFrameWidth=mattressWidth+.18,guestFrameLength=mattressLength+.23;
   for(const side of [-1,1])for(const end of [-1,1]){
@@ -1292,73 +1305,75 @@ summary{cursor:pointer}
   furnishingBox(guestBedX,guestTvZ+.10,16*guestTvScale+.055,.101,guestTvBottom-.03,guestTvTop+.025,'black');
   furnishingBox(guestBedX,guestTvZ+.154,16*guestTvScale,.013,guestTvBottom,guestTvTop,'workScreenDark');
 
-  const workX=X(617),workBack=Z(843),workWidth=58/12,workDepth=24/12,workHeight=30/12;
-  const workZ=workBack-workDepth/2,workFront=workBack-workDepth;
-  cushion(workX,workZ,workWidth,workDepth,workHeight-.11,.11,.11,'workDeskWood',.024);
-  furnishingBox(workX,workZ+.19,workWidth-.58,.14,2.29,2.41,officeHardware);
+  const workGeometry=quarterTurnFurniture(1);
+  const workX=-Z(770),workBack=X(538),workWidth=58/12,workDepth=24/12,workHeight=30/12;
+  const workZ=workBack+workDepth/2,workFront=workBack+workDepth;
+  workGeometry.cushion(workX,workZ,workWidth,workDepth,workHeight-.11,.11,.11,'workDeskWood',.024);
+  workGeometry.box(workX,workZ-.19,workWidth-.58,.14,2.29,2.41,officeHardware);
   for(const side of [-1,1]){
     const x=workX+side*(workWidth/2-.37);
-    cushion(x,workZ,.23,1.82,0,.11,.067,officeHardware,.023);
-    furnishingBox(x,workZ+.10,.19,.22,.08,1.35,officeHardware);
-    furnishingBox(x,workZ+.10,.15,.175,1.34,2.39,officeHardware);
+    workGeometry.cushion(x,workZ,.23,1.82,0,.11,.067,officeHardware,.023);
+    workGeometry.box(x,workZ-.10,.19,.22,.08,1.35,officeHardware);
+    workGeometry.box(x,workZ-.10,.15,.175,1.34,2.39,officeHardware);
   }
-  furnishingBox(workX-1.81,workFront+.04,.39,.22,2.28,2.402,officeHardware);
+  workGeometry.box(workX+1.81,workFront-.04,.39,.22,2.28,2.402,officeHardware);
   for(let key=0;key<5;key++){
-    furnishingBox(workX-1.81+(key-2)*.053,workFront-.072,.021,.014,2.322,2.345,'steel');
+    workGeometry.box(workX+1.81+(key-2)*.053,workFront+.072,.021,.014,2.322,2.345,'steel');
   }
-  footprint(workX,workZ,workWidth,workDepth,'#956645');
-  officeEquipment(workX,workBack,workFront,workHeight,-1,false);
-  rollingOfficeChair(workX,workFront,-1,true);
+  workGeometry.footprint(workX,workZ,workWidth,workDepth,'#956645');
+  officeEquipment(workX,workBack,workFront,workHeight,1,false,workGeometry);
+  rollingOfficeChair(workX,workFront,1,true,workGeometry);
 
   // Open walnut and steel LEGO display with a tall center bay for the rocket.
-  const displayX=X(548.5),displayZ=Z(751),displayWidth=44/12,displayDepth=14/12,displayHeight=66/12;
+  const displayGeometry=quarterTurnFurniture(-1);
+  const displayX=Z(663)+7/12,displayZ=-X(644),displayWidth=44/12,displayDepth=14/12,displayHeight=66/12;
   const lowerShelf=.54,middleShelf=1.62,sideShelf=2.72,upperShelf=4.23;
   for(const height of [lowerShelf,middleShelf,upperShelf,displayHeight]){
-    furnishingBox(displayX,displayZ,displayDepth,displayWidth,height-.09,height,'displayShelf');
+    displayGeometry.box(displayX,displayZ,displayDepth,displayWidth,height-.09,height,'displayShelf');
   }
   for(const side of [-1,1]){
     for(const end of [-1,1]){
-      furnishingBox(displayX+end*(displayDepth/2-.049),displayZ+side*(displayWidth/2-.048),
+      displayGeometry.box(displayX+end*(displayDepth/2-.049),displayZ+side*(displayWidth/2-.048),
         .095,.095,0,displayHeight+.05,'black');
-      furnishingBox(displayX+end*(displayDepth/2-.065),displayZ+side*.58,
+      displayGeometry.box(displayX+end*(displayDepth/2-.065),displayZ+side*.58,
         .088,.088,middleShelf,upperShelf-.075,'black');
     }
-    furnishingBox(displayX,displayZ+side*1.19,displayDepth-.06,1.15,sideShelf-.09,sideShelf,'displayShelf');
-    loft([
+    displayGeometry.box(displayX,displayZ+side*1.19,displayDepth-.06,1.15,sideShelf-.09,sideShelf,'displayShelf');
+    displayGeometry.loft([
       roundedRect(displayX-displayDepth/2+.065,displayZ+side*1.72,lowerShelf,.058,.095,.016),
       roundedRect(displayX-displayDepth/2+.065,displayZ-side*1.72,middleShelf,.058,.095,.016)
     ],'black');
   }
-  footprint(displayX,displayZ,displayDepth,displayWidth,'#624435');
+  displayGeometry.footprint(displayX,displayZ,displayDepth,displayWidth,'#624435');
 
   // A white delta-wing jet on a stand across the top shelf.
   const jetY=displayHeight+.31,jetZ=displayZ-.10;
-  furnishingBox(displayX,jetZ,.40,.51,displayHeight,displayHeight+.045,'black');
-  furnishingBox(displayX,jetZ,.105,.20,displayHeight+.045,jetY,'steel');
-  loft([[1.39,.014],[1.14,.066],[.91,.108],[-.87,.096],[-1.24,.055],[-1.44,.020]].map(([u,r])=>
+  displayGeometry.box(displayX,jetZ,.40,.51,displayHeight,displayHeight+.045,'black');
+  displayGeometry.box(displayX,jetZ,.105,.20,displayHeight+.045,jetY,'steel');
+  displayGeometry.loft([[1.39,.014],[1.14,.066],[.91,.108],[-.87,.096],[-1.24,.055],[-1.44,.020]].map(([u,r])=>
     circle(0,0,0,r).map(([x,,z])=>[displayX+x,jetY-z,jetZ+u])),'bedLinen');
   for(const side of [-1,1]){
-    furnitureFace([[displayX,jetY-.029,jetZ+.53],[displayX+side*.47,jetY-.038,jetZ-.91],
+    displayGeometry.face([[displayX,jetY-.029,jetZ+.53],[displayX+side*.47,jetY-.038,jetZ-.91],
       [displayX+side*.45,jetY-.038,jetZ-1.11],[displayX,jetY-.031,jetZ-.87]],'trim');
-    furnishingBox(displayX+side*.25,jetZ-.72,.099,.53,jetY-.12,jetY-.037,'bedLinen');
-    furnishingBox(displayX+side*.097,jetZ+.08,.013,1.51,jetY+.014,jetY+.033,'brickRed');
+    displayGeometry.box(displayX+side*.25,jetZ-.72,.099,.53,jetY-.12,jetY-.037,'bedLinen');
+    displayGeometry.box(displayX+side*.097,jetZ+.08,.013,1.51,jetY+.014,jetY+.033,'brickRed');
   }
-  furnitureFace([[displayX,jetY+.04,jetZ-.66],[displayX,jetY+.28,jetZ-1.05],
+  displayGeometry.face([[displayX,jetY+.04,jetZ-.66],[displayX,jetY+.28,jetZ-1.05],
     [displayX,jetY+.27,jetZ-1.27],[displayX,jetY+.04,jetZ-1.24]],'brickBlue');
 
   const modelBrick=(u,y,w,d,h,mat,offset=0)=>
-    furnishingBox(displayX+offset,displayZ+u,d,w,y,y+h,mat);
+    displayGeometry.box(displayX+offset,displayZ+u,d,w,y,y+h,mat);
   const rocketBase=middleShelf+.07,rocketX=displayX-.07;
   modelBrick(0,middleShelf,.73,.61,.07,'black',-.07);
   for(const [from,to,r1,r2,mat] of [
     [0,.29,.11,.11,'trim'],[.29,1.37,.108,.108,'brickOrange'],
     [1.37,1.51,.108,.069,'brickOrange'],[1.51,1.94,.069,.069,'trim'],[1.94,2.17,.068,.012,'trim']
   ]){
-    loft([circle(rocketX,displayZ,rocketBase+from,r1),circle(rocketX,displayZ,rocketBase+to,r2)],mat);
+    displayGeometry.loft([circle(rocketX,displayZ,rocketBase+from,r1),circle(rocketX,displayZ,rocketBase+to,r2)],mat);
   }
   for(const side of [-1,1]){
     const z=displayZ+side*.185;
-    loft([circle(rocketX,z,rocketBase+.12,.047),circle(rocketX,z,rocketBase+1.13,.047),
+    displayGeometry.loft([circle(rocketX,z,rocketBase+.12,.047),circle(rocketX,z,rocketBase+1.13,.047),
       circle(rocketX,z,rocketBase+1.28,.012)],'trim');
     modelBrick(side*.146,rocketBase+.38,.16,.058,.043,'black',-.07);
   }
@@ -1392,7 +1407,7 @@ summary{cursor:pointer}
     for(const side of [-1,1])modelBrick(u+side*.059,y,.08,.091,.117,'black',offset);
     modelBrick(u,y+.112,.19,.104,.148,mat,offset);
     for(const side of [-1,1])modelBrick(u+side*.117,y+.133,.054,.076,.119,mat,offset);
-    loft([circle(displayX+offset,displayZ+u,y+.259,.067),circle(displayX+offset,displayZ+u,y+.368,.067)],'brickYellow');
+    displayGeometry.loft([circle(displayX+offset,displayZ+u,y+.259,.067),circle(displayX+offset,displayZ+u,y+.368,.067)],'brickYellow');
     modelBrick(u,y+.363,.148,.128,.038,mat,offset);
     for(const side of [-1,1])modelBrick(u+side*.025,y+.31,.015,.012,.017,'black',offset+.062);
   }
@@ -1559,7 +1574,7 @@ summary{cursor:pointer}
     {name:'Ensuite',p:[501,237],target:[456,270],area:[442,155,531,318]},
     {name:'Walk-in closet',p:[494,381],target:[445,419],area:[442,322,531,445]},
     {name:'Bedroom 2',dim:'9′8″ × 10′0″',p:[611,584],target:[679,502],pitch:-.28,area:[598,480,772,657]},
-    {name:'Bedroom 3',dim:'13′3″ × 10′3″',p:[614,693],target:[680,791],pitch:-.32,area:[536,662,772,847]},
+    {name:'Bedroom 3',dim:'13′3″ × 10′3″',p:[611,706],target:[668,785],pitch:-.29,area:[536,662,772,847]},
     {name:'Hall bath',p:[653,450],target:[731,400],area:[598,385,772,475]},
     {name:'Garage',dim:'20′0″ × 22′0″ nominal',p:[742,1218],target:[600,1055],pitch:-.29,y:garage,area:[429,854,771,1235]},
     {name:'Unfinished basement',p:[570,799],target:[521,272],y:basement,area:[240,160,771,1080],level:1}
