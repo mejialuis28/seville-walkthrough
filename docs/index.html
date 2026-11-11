@@ -150,6 +150,8 @@ summary{cursor:pointer}
   material('lampShade','Warm white linen drum shade','fff0d7',10);
   material('mediaWhite','Warm white media console','eeebe3');
   material('mediaFrost','Frosted gray drawer inserts','a9b0a9');
+  material('bedroomTvScreen','50-inch bedroom TV screen','252930',15);
+  material('bedroomConsoleWood','Walnut console legs and door grooves','71503a',6);
   material('tvScreen','65-inch TV screen','252930',15);
   material('artMat','Ivory picture mat','e5dfd3');
   material('artPaper','Warm white print paper','f1ecdf');
@@ -1021,6 +1023,56 @@ summary{cursor:pointer}
     furnishingBox(nightstandFront-.008,z,.015,nightstandWidth-.48,.32,.80,'nightstandInset');
     furnishingBox(nightstandFront-.047,z,.08,.47,.846,.906,'nightstandGray');
     footprint(nightstandX-.04,z,nightstandDepth+.08,nightstandWidth,'#585a5e');
+  }
+
+  // The console sits between the ensuite and closet, with the screen facing the bed.
+  const consoleDepth=15/12,consoleWidth=43/12,consoleHeight=25/12;
+  const consoleBack=X(538),consoleX=consoleBack+consoleDepth/2,consoleFront=consoleBack+consoleDepth;
+  const cabinetBase=.48,panelThickness=.065;
+  furnishingBox(consoleX,bedZ,consoleDepth,consoleWidth,consoleHeight-.07,consoleHeight,'mediaWhite');
+  furnishingBox(consoleX,bedZ,consoleDepth,consoleWidth,cabinetBase,cabinetBase+.065,'mediaWhite');
+  furnishingBox(consoleBack+.05,bedZ,.06,consoleWidth-.12,cabinetBase+.06,consoleHeight-.07,'mediaWhite');
+  for(const side of [-1,1]){
+    furnishingBox(consoleX,bedZ+side*(consoleWidth-panelThickness)/2,consoleDepth-.05,panelThickness,
+      cabinetBase+.06,consoleHeight-.07,'mediaWhite');
+    for(const end of [-1,1]){
+      const legX=consoleX+end*.40,legZ=bedZ+side*(consoleWidth/2-.29);
+      loft([circle(legX+end*.09,legZ+side*.12,0,.052),circle(legX,legZ,cabinetBase+.018,.076)],'bedroomConsoleWood');
+    }
+  }
+  const doorWidth=consoleWidth*.36,doorZ=bedZ-consoleWidth/2+panelThickness+doorWidth/2;
+  const dividerZ=doorZ+doorWidth/2;
+  const shelfEnd=bedZ+consoleWidth/2-panelThickness;
+  furnishingBox(consoleX,dividerZ,consoleDepth-.09,panelThickness,cabinetBase+.06,consoleHeight-.07,'mediaWhite');
+  furnishingBox(consoleX,(dividerZ+shelfEnd)/2,consoleDepth-.08,shelfEnd-dividerZ,1.23,1.29,'mediaWhite');
+  const doorBottom=cabinetBase+.08,doorTop=consoleHeight-.09;
+  furnishingBox(consoleFront-.047,doorZ,.04,doorWidth-.035,doorBottom,doorTop,'bedroomConsoleWood');
+  const slatHeight=(doorTop-doorBottom)/8;
+  for(let row=0;row<8;row++){
+    const y=doorBottom+row*slatHeight;
+    furnishingBox(consoleFront-.027,doorZ,.025,doorWidth-.035,y+.005,y+slatHeight-.005,'mediaWhite');
+  }
+  const pullZ=dividerZ-.16,pullY=doorTop-.21;
+  loft([[0,.058],[.012,.058]].map(([offset,r])=>
+    circle(0,pullZ,0,r).map(([y,,z])=>[consoleFront-.015+offset,pullY-y,z])
+  ),'bedroomConsoleWood');
+  loft([[.010,.042],[.015,.042]].map(([offset,r])=>
+    circle(0,pullZ,0,r).map(([y,,z])=>[consoleFront-.015+offset,pullY-y,z])
+  ),'black');
+  footprint(consoleX,bedZ,consoleDepth,consoleWidth,'#e8e5dc');
+
+  const bedroomScreenScale=(50/12)/Math.hypot(16,9);
+  const bedroomScreenWidth=16*bedroomScreenScale,bedroomScreenHeight=9*bedroomScreenScale;
+  const bedroomTvX=consoleBack+.39,bedroomTvBottom=consoleHeight+.21;
+  const bedroomTvTop=bedroomTvBottom+bedroomScreenHeight;
+  furnishingBox(bedroomTvX,bedZ,.09,bedroomScreenWidth+.05,bedroomTvBottom-.035,bedroomTvTop+.025,'black');
+  furnishingBox(bedroomTvX+.047,bedZ,.012,bedroomScreenWidth,bedroomTvBottom,bedroomTvTop,'bedroomTvScreen');
+  for(const side of [-1,1])for(const toe of [-1,1]){
+    const z=bedZ+side*1.24;
+    loft([
+      roundedRect(bedroomTvX+toe*.22,z+side*.13,consoleHeight,.20,.058,.019),
+      roundedRect(bedroomTvX,z,bedroomTvBottom+.01,.075,.068,.019)
+    ],'black');
   }
 
   // Canadian 2026 Taos 4MOTION dimensions. Positive Z faces the garage door.
