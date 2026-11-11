@@ -1,0 +1,7 @@
+/*
+!/.gitignore
+!/docs/
+/docs/*
+!/docs/index.html
+!/docs/seville-470a.glb
+!/docs/.nojekyll
